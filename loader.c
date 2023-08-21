@@ -5,24 +5,24 @@ typedef int (*StartFunction)();
 Elf32_Ehdr *ehdr;
 Elf32_Phdr *phdr;
 int fd;
+void *file_content;
+int filesize;
 
 /*
  * release memory and other cleanups
  */
-void loader_cleanup() {
-  munmap(file_content, st.st_size);
-  close(fd);
-}
+
 
 /*
  * Load and run the ELF executable file
  */
-void load_and_run_elf(char* exe) {
-  fd = open(exe, O_RDONLY);
+void load_and_run_elf(char* argv) {
+  fd = open(argv, O_RDONLY);
 
-
+  struct stat st;
   // 1. Load entire binary content into the memory from the ELF file.
-  void *file_content=mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  file_content=mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  filesize = st.st_size;
 
   ehdr=(Elf32_Ehdr*)(file_content);
   phdr=(Elf32_Phdr*)(file_content + ehdr->e_phoff);
@@ -35,7 +35,7 @@ void load_and_run_elf(char* exe) {
   for(int i=0; i<ehdr->e_phnum; ++i){
     if(phdr[i].p_type==PT_LOAD){
       pmemsz=phdr[i].p_memsz;
-      if(ehdr.e_entry>=phdr.p_vaddr && ehdr.e_entry<phdr.p_vaddr+pmemsz){
+      if(ehdr->e_entry>=phdr->p_vaddr && ehdr->e_entry<phdr->p_vaddr+pmemsz){
         entry_segment=&phdr[i];
         break;
       }
@@ -48,14 +48,20 @@ void load_and_run_elf(char* exe) {
 
 
   // 4. Navigate to the entrypoint address into the segment loaded in the memory in above step
-  ELF32_Off offset_within_segment = entry_point - entry_segment -> p_vaddr;
+  int offset_within_segment = entry_point - entry_segment -> p_vaddr;
   void *entry_address = (char* )file_content + entry_segment -> p_offset + offset_within_segment;
 
   // 5. Typecast the address to that of function pointer matching "_start" method in fib.c.
-  StartFunction _start() = (StartFunction)entry_address;
+  int (*_start)() = (int (*)())(StartFunction)entry_address;
   // 6. Call the "_start" method and print the value returned from the "_start"
   int result = _start();
   printf("User _start return value = %d\n",result);
+}
+
+
+void loader_cleanup() {
+  munmap(file_content, filesize);
+  close(fd);
 }
 
 int main(int argc, char** argv) 
