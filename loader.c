@@ -97,11 +97,8 @@ void load_and_run_elf(char** argv) {
 
 
   // 4. Navigate to the entrypoint address into the segment loaded in the memory in above step
-  int offset_within_segment = (ehdr->e_entry) - (entry_segment -> p_vaddr);
-  printf("CHECK 6\n");
-  //void *entry_address = file_content + (entry_segment -> p_offset) + offset_within_segment;
-  void *entry_address = virtual_mem + offset_within_segment;
-  printf("CHECK 7\n");
+  void *entry_address = virtual_mem + (ehdr->e_entry - entry_segment->p_vaddr);
+
 
   // 5. Typecast the address to that of function pointer matching "_start" method in fib.c.
   int (*_start)() = (int (*)())entry_address;
