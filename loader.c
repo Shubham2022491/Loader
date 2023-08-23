@@ -29,7 +29,6 @@ void load_and_run_elf(char** argv) {
   // 1. Load entire binary content into the memory from the ELF file.
   ehdr=(Elf32_Ehdr*)(file_content);
   phdr=(Elf32_Phdr*)(file_content + ehdr->e_phoff);
-  Elf32_Addr entry_point=ehdr->e_entry;
   Elf32_Phdr *entry_segment =NULL;
 
 
