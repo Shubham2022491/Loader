@@ -54,8 +54,10 @@ void load_and_run_elf(char** argv) {
     close(fd);
   }
 
-  for (size_t offset = 0; offset < entry_segment->p_memsz; offset++) {
+  size_t offset = 0;
+  while (offset < entry_segment->p_memsz) {
       ((char *)virtual_mem)[offset] = ((char *)file_content)[entry_segment->p_offset + offset];
+      offset++;
   }
 
 
