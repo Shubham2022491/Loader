@@ -33,15 +33,16 @@ void load_and_run_elf(char** argv) {
 
 
   // 2. Iterate through the PHDR table and find the section of PT_LOAD type that contains the address of the entrypoint method in fib.c
-  unsigned int p_memsz;
-  for(int i=0; i<ehdr->e_phnum; ++i){
-    if(phdr[i].p_type==PT_LOAD){
-      p_memsz=phdr[i].p_memsz;
-      if(ehdr->e_entry>=phdr->p_vaddr && ehdr->e_entry<phdr->p_vaddr+p_memsz){
-        entry_segment=&phdr[i];
-        break;
+  int i = 0;
+  while (i < ehdr->e_phnum) {
+      if (phdr[i].p_type == PT_LOAD) {
+          p_memsz = phdr[i].p_memsz;
+          if (ehdr->e_entry >= phdr[i].p_vaddr && ehdr->e_entry < phdr[i].p_vaddr + p_memsz) {
+              entry_segment = &phdr[i];
+              break;
+          }
       }
-    }
+      i++;
   }
 
 
