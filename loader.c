@@ -34,6 +34,7 @@ void load_and_run_elf(char** argv) {
 
   // 2. Iterate through the PHDR table and find the section of PT_LOAD type that contains the address of the entrypoint method in fib.c
   int i = 0;
+  Elf32_Word p_memsz = 0;
   while (i < ehdr->e_phnum) {
       if (phdr[i].p_type == PT_LOAD) {
           p_memsz = phdr[i].p_memsz;
